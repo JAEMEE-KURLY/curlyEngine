@@ -1,0 +1,79 @@
+basePath: /api/v1
+definitions:
+  example.Response:
+    properties:
+      result:
+        type: string
+    type: object
+  restapi.JSONResult:
+    properties:
+      code:
+        example: 0
+        type: integer
+      data:
+        type: object
+      message:
+        example: Success
+        type: string
+    type: object
+info:
+  contact: {}
+  description: <h2><b>PosGo REST API Swagger Documentation</b></h2>
+  title: PosGo REST API
+  version: 0.1.0
+paths:
+  /example:
+    get:
+      consumes:
+      - application/json
+      description: Example API
+      parameters:
+      - description: Example message
+        in: query
+        name: message
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/example.Response'
+              type: object
+        "400":
+          description: Error
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.JSONResult'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/restapi.JSONResult'
+            - properties:
+                data:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Example API
+      tags:
+      - Example
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: Sample TAG
+  name: Sample
