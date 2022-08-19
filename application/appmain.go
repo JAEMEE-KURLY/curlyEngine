@@ -1,12 +1,14 @@
 package appmmain
 
 import (
+	httpserver "almcm.poscoict.com/scm/pme/curly-engine/communication/http"
 	. "almcm.poscoict.com/scm/pme/curly-engine/configure"
+	gormdb "almcm.poscoict.com/scm/pme/curly-engine/database/gorm"
+	"almcm.poscoict.com/scm/pme/curly-engine/database/gorm/logdb"
+	"almcm.poscoict.com/scm/pme/curly-engine/database/gorm/userdb"
+	utility "almcm.poscoict.com/scm/pme/curly-engine/library"
 	. "almcm.poscoict.com/scm/pme/curly-engine/log"
 	"sync"
-	"almcm.poscoict.com/scm/pme/curly-engine/database/gorm/userdb"
-	"almcm.poscoict.com/scm/pme/curly-engine/database/gorm/logdb"
-	utility "almcm.poscoict.com/scm/pme/curly-engine/library"
 )
 
 func Run(conf *Values) {
@@ -18,13 +20,16 @@ func Run(conf *Values) {
 
 	wg := new(sync.WaitGroup)
 
-	// TEST DATABASE
-	userdb.InitUserTable()
-	logdb.InitLoggingTable()
+	err := gormdb.InitSingletonDB()
+	if err == nil {
+		userdb.InitUserTable()
+		logdb.InitLoggingTable()
+	}
 
 	// HTTP
 	if conf.Net.EnableHttp && conf.CurlyEngine.EnableHttpServer {
-		// go httpserver.HttpServer(conf.CurlyEngine.HttpServerPort)
+		Logi("http enabled")
+		go httpserver.HttpServer(conf.CurlyEngine.HttpServerPort)
 	}
 
 	// Websocket

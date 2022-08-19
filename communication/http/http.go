@@ -8,11 +8,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	echoSwagger "github.com/swaggo/echo-swagger"
 	"almcm.poscoict.com/scm/pme/curly-engine/docs"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
-	_ "almcm.poscoict.com/scm/pme/curly-engine/docs"
 	"almcm.poscoict.com/scm/pme/curly-engine/configure"
+	_ "almcm.poscoict.com/scm/pme/curly-engine/docs"
+	ApiCrawl "almcm.poscoict.com/scm/pme/curly-engine/restapi/v1/crawl"
 )
 
 // HttpServer
@@ -59,4 +60,5 @@ func HttpServer(port string) {
 func setRoute(e *echo.Echo) {
 	// Insert API Route
 	// ApiUser.SetRoute(e)
+	ApiCrawl.SetRoute(e);
 }
