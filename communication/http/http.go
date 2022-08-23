@@ -1,19 +1,18 @@
 package httpserver
 
 import (
-	"strings"
+    "strings"
 
-	. "almcm.poscoict.com/scm/pme/curly-engine/log"
+    . "almcm.poscoict.com/scm/pme/curly-engine/log"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+    "github.com/labstack/echo/v4"
+    "github.com/labstack/echo/v4/middleware"
 
-	"almcm.poscoict.com/scm/pme/curly-engine/docs"
-	echoSwagger "github.com/swaggo/echo-swagger"
+    "almcm.poscoict.com/scm/pme/curly-engine/docs"
+    echoSwagger "github.com/swaggo/echo-swagger"
 
-	"almcm.poscoict.com/scm/pme/curly-engine/configure"
-	_ "almcm.poscoict.com/scm/pme/curly-engine/docs"
-	ApiCrawl "almcm.poscoict.com/scm/pme/curly-engine/restapi/v1/crawl"
+    "almcm.poscoict.com/scm/pme/curly-engine/configure"
+    _ "almcm.poscoict.com/scm/pme/curly-engine/docs"
 )
 
 // HttpServer
@@ -31,34 +30,33 @@ import (
 // @tag.name Sample
 // @tag.description Sample TAG
 func HttpServer(port string) {
-	conf := configure.GetConfig()
+    conf := configure.GetConfig()
 
-	port = strings.Trim(port, " ")
-	if len(port) <= 0 {
-		port = conf.CurlyEngine.HttpServerPort
-	}
-	docs.SwaggerInfo.Host = conf.CurlyEngine.SwaggerAddress + ":" + port
+    port = strings.Trim(port, " ")
+    if len(port) <= 0 {
+        port = conf.CurlyEngine.HttpServerPort
+    }
+    docs.SwaggerInfo.Host = conf.CurlyEngine.SwaggerAddress + ":" + port
 
-	e := echo.New()
+    e := echo.New()
 
-	e.Use(middleware.Recover())
-	e.Use(middleware.Logger())
-	e.Logger.SetOutput(GetLogWriter())
+    e.Use(middleware.Recover())
+    e.Use(middleware.Logger())
+    e.Logger.SetOutput(GetLogWriter())
 
-	// swagger documents
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+    // swagger documents
+    e.GET("/swagger/*", echoSwagger.WrapHandler)
 
-	setRoute(e)
+    setRoute(e)
 
-	err := e.Start(":" + port)
-	if err != nil {
-		e.Logger.Fatal(err)
-	}
+    err := e.Start(":" + port)
+    if err != nil {
+        e.Logger.Fatal(err)
+    }
 }
 
 // setRoute
 func setRoute(e *echo.Echo) {
-	// Insert API Route
-	// ApiUser.SetRoute(e)
-	ApiCrawl.SetRoute(e);
+    // Insert API Route
+    // ApiUser.SetRoute(e)
 }
