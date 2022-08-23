@@ -1,45 +1,179 @@
 package utility
 
 import (
-	. "almcm.poscoict.com/scm/pme/curly-engine/log"
-	"github.com/PuerkitoBio/goquery"
-	"net/http"
+    . "almcm.poscoict.com/scm/pme/curly-engine/log"
+    "context"
+    "fmt"
+    "github.com/PuerkitoBio/goquery"
+    "github.com/chromedp/chromedp"
+    "math"
+    libUrl "net/url"
+    "regexp"
+    "strconv"
+    "strings"
+    "time"
 )
 
-var countMap map[int]string
+type ItemInfo struct {
+    CategoryName string
+    Date         string
+    Name         string
+    Price        string
+    SiteName     string
+    Weight       string
+    Cnt          string
+    Unit         string
+    Bundle       string
+    ImageSrc     string
+    Size         string
+}
 
-func GetCrawlingInfo() error {
-	// Request
-	// 이마트
-	url := "https://emart.ssg.com/search.ssg?target=all&query=%EA%B9%80%EC%B9%98"
-	resp, err := http.Get(url)
-	if err != nil {
-		Loge("failed to get http response")
-	}
-	defer resp.Body.Close()
+func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass string, splitElem string,
+    splitElemClass string, divImageclass string, aTitleclass string, titleElem string,
+    titleClass string, priceElem string, priceClass string, url string, item string) error {
+    ctx, cancel := chromedp.NewContext(context.Background())
+    defer cancel()
 
-	// HTML 읽기
-	html, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		Loge("failed to exec goquery")
-	}
+    var name []string
+    var price []string
+    var imageSrc []string
 
-	html.Find("#item_unit_1000017881155 > div.cunit_info > div.cunit_md.notranslate > div > a > em.tx_ko").Each(func(i int, s *goquery.Selection) {
-		//class, _ := s.Attr("class")
-		Logd("%s", s.Text())
-		//divSeletctor, ok := s.Attr("class")
-		//if ok {
-		//	Logd("%s", divSeletctor)
-		//}
-		//divSeletctor, ok := s.Find("div")
-		//if ok {
-		//	//for p := s.Parent(); p.Size() > 0 && !ok; p = p.Parent() {
-		//	//    classes, ok = p.Attr("class")
-		//	//}
-		//	Logd("%s", classes)
-		//}
-		//Logd("Link #%d:\ntext: %s\nclass: %s\n\n", i, s.Text(), classes)
-	})
+    realUrl := url + libUrl.QueryEscape(item)
 
-	return nil
+    var data [5]string
+    if err := chromedp.Run(ctx,
+
+        chromedp.Navigate(realUrl),
+        chromedp.Sleep(time.Second*1),
+        chromedp.OuterHTML("html", &data[0], chromedp.ByQuery),
+        chromedp.ActionFunc(func(ctx context.Context) error {
+            for i := 1; i <= 4; i++ {
+                // todo search button and  click
+                if buttonElem == "button" {
+                    chromedp.Click(buttonElem+"."+strings.Join(strings.Split(buttonClass, " "), "."), chromedp.ByQueryAll).Do(ctx)
+                } else {
+                    chromedp.Click("//"+buttonElem+"[text() = '"+strconv.Itoa(i+1)+"']", chromedp.BySearch).Do(ctx)
+                }
+                chromedp.Sleep(time.Second * 3).Do(ctx)
+                chromedp.OuterHTML("html", &data[i], chromedp.ByQuery).Do(ctx)
+            }
+            return nil
+        }),
+        //chromedp.Click("#root > div > div.css-1di1x1r-container > div.css-oiwa5q-defaultStyle-gridRow-IntegratedSearch > div.mainWrap > div:nth-child(2) > div > div.pagination-js.css-dpcmyw-defaultStyle > button:nth-child(11)", chromedp.ByQueryAll),
+        //chromedp.Sleep(time.Second*5),
+        //chromedp.OuterHTML("html", &data2, chromedp.ByQuery),
+    ); err != nil {
+        Loge("chromedp run failed")
+    }
+    for i := 0; i < len(data); i++ {
+        var doc, _ = goquery.NewDocumentFromReader(strings.NewReader(data[i]))
+        temp0 := doc.Find("div")
+        temp0.Each(func(i int, s0 *goquery.Selection) {
+            class, _ := s0.Attr("class")
+            if class == divContainerClass {
+                temp := s0.Find(splitElem)
+                temp.Each(func(i int, s1 *goquery.Selection) {
+                    class2, _ := s1.Attr("class")
+                    if class2 == splitElemClass {
+                        temp1 := s1.Find("div")
+                        temp1.Each(func(i int, sImage *goquery.Selection) {
+                            classImage, _ := sImage.Attr("class")
+                            if classImage == divImageclass {
+                                tempImage := sImage.Find("img")
+                                tempImage.Each(func(i int, sImage2 *goquery.Selection) {
+                                    imgSrc, exists := sImage2.Attr("src")
+                                    if exists {
+                                        //fmt.Println(imgSrc)
+                                        imageSrc = append(imageSrc, imgSrc)
+                                    }
+                                })
+                            }
+                        })
+
+                        temp2 := s1.Find("a")
+                        temp2.Each(func(i int, s2 *goquery.Selection) {
+                            class3, _ := s2.Attr("class")
+                            if class3 == aTitleclass {
+                                temp3 := s2.Find(titleElem)
+                                temp3.Each(func(i int, s3 *goquery.Selection) {
+                                    class4, _ := s3.Attr("class")
+                                    if class4 == titleClass {
+                                        //fmt.Printf("%s\n", strings.TrimSpace(s3.Text()))
+                                        name = append(name, s3.Text())
+                                    }
+                                })
+                            }
+                        })
+                        temp3 := s1.Find(priceElem)
+                        tempPrice := math.MaxInt
+                        var tempPriceString string
+                        temp3.Each(func(i int, s3 *goquery.Selection) {
+                            class3, _ := s3.Attr("class")
+                            if class3 == priceClass {
+                                //fmt.Printf("%s\n", strings.Trim(s3.Text(), ","))
+                                intVar, _ := strconv.Atoi(strings.Replace(s3.Text(), ",", "", -1))
+                                if intVar <= 100 {
+                                    return
+                                }
+                                if intVar < tempPrice {
+                                    tempPrice = intVar
+                                    tempPriceString = s3.Text()
+                                }
+                            }
+                        })
+                        //fmt.Printf("%s\n", tempPrice)
+                        price = append(price, tempPriceString)
+                    }
+                })
+            }
+        })
+    }
+
+    tempUrl, err := libUrl.Parse(url)
+    if err != nil {
+        Loge("url parse failed")
+    }
+    parts := strings.Split(tempUrl.Hostname(), ".")
+    //domain := parts[len(parts)-2] + "." + parts[len(parts)-1]
+    //fmt.Println(parts[len(parts)-2])
+
+    currentTime := time.Now()
+    currentDate := currentTime.Format("2006-01-02")
+
+    var itemInfo []ItemInfo
+
+    for i := 0; i < len(name); i++ {
+        r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg))")
+
+        weight := r.FindString(name[i])
+
+        r, _ = regexp.Compile("(([0-9]?[-])?[0-9]+(개|봉|입|과))")
+
+        cnt := r.FindString(name[i])
+
+        r, _ = regexp.Compile("(g|kg)")
+
+        unit := r.FindString(name[i])
+
+        r, _ = regexp.Compile("(([0-9]+[+][0-9]+))")
+
+        bundle := r.FindString(name[i])
+
+        temp := ItemInfo{
+            CategoryName: item,
+            Date:         currentDate,
+            Name:         name[i],
+            Price:        price[i],
+            SiteName:     parts[1],
+            Weight:       weight,
+            Cnt:          cnt,
+            Unit:         unit,
+            Bundle:       bundle,
+            ImageSrc:     imageSrc[i],
+        }
+        itemInfo = append(itemInfo, temp)
+        fmt.Printf("%v\n", temp)
+    }
+
+    return nil
 }
