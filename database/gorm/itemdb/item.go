@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const ItemInfoTableName = "item_info"
+const ItemInfoTableName = "price_info"
 
 type ItemInfo struct {
 	gorm.Model
