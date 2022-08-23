@@ -8,19 +8,19 @@ import (
 
 type SiteInfo struct {
 	gorm.Model
-	buttonElem        string `gorm:"not null;"`
-	buttonClass       string
-	divContainerClass string `gorm:"not null;"`
-	splitElem         string `gorm:"not null;"`
-	splitElemClass    string `gorm:"not null;"`
-	divImageclass     string `gorm:"not null;"`
-	aTitleclass       string `gorm:"not null;"`
-	titleElem         string `gorm:"not null;"`
-	titleClass        string `gorm:"not null;"`
-	priceElem         string `gorm:"not null;"`
-	preceClass        string `gorm:"not null;"`
-	url               string `gorm:"not null;"`
-	item              string `gorm:"not null;"`
+	ButtonElem        string `gorm:"not null;"`
+	ButtonClass       string
+	DivContainerClass string `gorm:"not null;"`
+	SplitElem         string `gorm:"not null;"`
+	SplitElemClass    string `gorm:"not null;"`
+	DivImageclass     string `gorm:"not null;"`
+	ATitleclass       string `gorm:"not null;"`
+	TitleElem         string `gorm:"not null;"`
+	TitleClass        string `gorm:"not null;"`
+	PriceElem         string `gorm:"not null;"`
+	PreceClass        string `gorm:"not null;"`
+	Url               string `gorm:"not null;"`
+	Item              string `gorm:"not null;"`
 }
 
 var DbInfo *database.DbInfo
@@ -73,7 +73,7 @@ func FindByIdSiteName(site_name string) *SiteInfo {
 	DbInfo.Db.First(&site, "site_name = ?", site_name)
 
 	Logd("SiteInfobuttonElem= %s, buttonClass= %s, divContainerClass= %s, splitElem= %s, splitElemClass= %s, divImageclass= %s, aTitleclass= %s, titleElem= %s, titleClass= %s, priceElem= %s, preceClass= %s, url= %s, item              ",
-		site.buttonElem, site.buttonClass, site.divContainerClass, site.splitElem, site.splitElemClass, site.divImageclass, site.aTitleclass, site.titleElem, site.titleClass, site.priceElem, site.preceClass, site.url, site.item, site.Model.CreatedAt.String(), site.Model.UpdatedAt.String())
+		site.ButtonElem, site.ButtonClass, site.DivContainerClass, site.SplitElem, site.SplitElemClass, site.DivImageclass, site.ATitleclass, site.TitleElem, site.TitleClass, site.PriceElem, site.PreceClass, site.Url, site.Item, site.Model.CreatedAt.String(), site.Model.UpdatedAt.String())
 
 	return &site
 }
