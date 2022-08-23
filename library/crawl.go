@@ -128,11 +128,13 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
     currentDate := currentTime.Format("2006-01-02")
 
     for i := 0; i < len(name); i++ {
+        tempPrice, _ := strconv.Atoi(strings.Replace(price[i], ",", "", -1))
         r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg))")
 
         weight := r.FindString(name[i])
         weight = strings.Replace(weight, "g", "", -1)
         weight = strings.Replace(weight, "kg", "", -1)
+        tempWeight, _ := strconv.ParseFloat(weight, 32)
 
         r, _ = regexp.Compile("(([0-9]?[-])?[0-9]+(개|봉|입|과))")
 
@@ -150,9 +152,9 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
             Category: item,
             Date:     currentDate,
             Name:     name[i],
-            Price:    strings.Replace(price[i], ",", "", -1),
+            Price:    tempPrice,
             SiteName: parts[1],
-            Weight:   weight,
+            Weight:   float32(tempWeight),
             Cnt:      cnt,
             Unit:     unit,
             Bundle:   bundle,

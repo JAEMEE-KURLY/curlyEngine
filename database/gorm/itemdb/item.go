@@ -11,12 +11,12 @@ const ItemInfoTableName = "price_info"
 
 type ItemInfo struct {
 	gorm.Model
-	Name     string `gorm:"not null;""`
-	Price    string `gorm:"not null";`
-	SiteName string `gorm:"not null";`
-	Weight   string `gorm:"not null";`
-	Category string `gorm:"not null";`
-	Date     string `gorm:"not null";`
+	Name     string  `gorm:"not null;""`
+	Price    int     `gorm:"not null";`
+	SiteName string  `gorm:"not null";`
+	Weight   float32 `gorm:"not null";`
+	Category string  `gorm:"not null";`
+	Date     string  `gorm:"not null";`
 	Cnt      string
 	Unit     string
 	Bundle   string
