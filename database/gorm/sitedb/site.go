@@ -2,6 +2,7 @@ package sitedb
 
 import (
 	"almcm.poscoict.com/scm/pme/curly-engine/database"
+	gormdb "almcm.poscoict.com/scm/pme/curly-engine/database/gorm"
 	. "almcm.poscoict.com/scm/pme/curly-engine/log"
 	"gorm.io/gorm"
 )
@@ -58,6 +59,17 @@ func CreateTableSite() {
 
 func InsertSite(site_info *SiteInfo) {
 	DbInfo.Db.Create(site_info)
+}
+func GetSiteInfoist() (retSite []SiteInfo) {
+	var site []SiteInfo
+
+	gormdb.MainDB.Db.Model(&SiteInfo{}).Find(&site)
+
+	for _, info := range site {
+		retSite = append(retSite, info)
+	}
+
+	return retSite
 }
 
 func FindByIdSiteName(site_name string) *SiteInfo {
