@@ -64,7 +64,11 @@ func CreateTableItem() {
 func InsertUser(item_info *ItemInfo) {
 	DbInfo.Db.Create(item_info)
 }
-
+func GetInfo(id string) ItemInfo {
+	var info ItemInfo
+	DbInfo.Db.Model(&ItemInfo{}).Where("id=?", id).Scan(&info)
+	return info
+}
 func FindByIdItemName(item_name string) *ItemInfo {
 	if DbInfo == nil {
 		var err error
