@@ -1,10 +1,5 @@
 basePath: /api/v1
 definitions:
-  crawl.Response:
-    properties:
-      result:
-        type: string
-    type: object
   example.Response:
     properties:
       result:
@@ -71,46 +66,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Example API
-      tags:
-      - Example
-  /info:
-    get:
-      consumes:
-      - application/json
-      description: carwling 정보를 얻는 API
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Success
-          schema:
-            allOf:
-            - $ref: '#/definitions/restapi.JSONResult'
-            - properties:
-                data:
-                  $ref: '#/definitions/crawl.Response'
-              type: object
-        "400":
-          description: Error
-          schema:
-            allOf:
-            - $ref: '#/definitions/restapi.JSONResult'
-            - properties:
-                data:
-                  type: string
-              type: object
-        "401":
-          description: Unauthorized
-          schema:
-            allOf:
-            - $ref: '#/definitions/restapi.JSONResult'
-            - properties:
-                data:
-                  type: string
-              type: object
-      security:
-      - ApiKeyAuth: []
-      summary: carwling 정보를 얻는 API
       tags:
       - Example
 securityDefinitions:

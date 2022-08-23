@@ -1,9 +1,9 @@
 package utility
 
 import (
+    "almcm.poscoict.com/scm/pme/curly-engine/database/gorm/itemdb"
     . "almcm.poscoict.com/scm/pme/curly-engine/log"
     "context"
-    "fmt"
     "github.com/PuerkitoBio/goquery"
     "github.com/chromedp/chromedp"
     "math"
@@ -14,23 +14,10 @@ import (
     "time"
 )
 
-type ItemInfo struct {
-    CategoryName string
-    Date         string
-    Name         string
-    Price        string
-    SiteName     string
-    Weight       string
-    Cnt          string
-    Unit         string
-    Bundle       string
-    ImageSrc     string
-    Size         string
-}
-
 func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass string, splitElem string,
     splitElemClass string, divImageclass string, aTitleclass string, titleElem string,
     titleClass string, priceElem string, priceClass string, url string, item string) error {
+    Logd("start crawling")
     ctx, cancel := chromedp.NewContext(context.Background())
     defer cancel()
 
@@ -140,8 +127,6 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
     currentTime := time.Now()
     currentDate := currentTime.Format("2006-01-02")
 
-    var itemInfo []ItemInfo
-
     for i := 0; i < len(name); i++ {
         r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg))")
 
@@ -159,20 +144,20 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
 
         bundle := r.FindString(name[i])
 
-        temp := ItemInfo{
-            CategoryName: item,
-            Date:         currentDate,
-            Name:         name[i],
-            Price:        price[i],
-            SiteName:     parts[1],
-            Weight:       weight,
-            Cnt:          cnt,
-            Unit:         unit,
-            Bundle:       bundle,
-            ImageSrc:     imageSrc[i],
+        temp := &itemdb.ItemInfo{
+            Category: item,
+            Date:     currentDate,
+            Name:     name[i],
+            Price:    price[i],
+            SiteName: parts[1],
+            Weight:   weight,
+            Cnt:      cnt,
+            Unit:     unit,
+            Bundle:   bundle,
+            ImageSrc: imageSrc[i],
         }
-        itemInfo = append(itemInfo, temp)
-        fmt.Printf("%v\n", temp)
+        itemdb.InsertNewItem(temp)
+        Logd("%v\n", temp)
     }
 
     return nil
