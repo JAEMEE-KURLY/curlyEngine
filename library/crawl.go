@@ -131,6 +131,8 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
         r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg))")
 
         weight := r.FindString(name[i])
+        weight = strings.Replace(weight, "g", "", -1)
+        weight = strings.Replace(weight, "kg", "", -1)
 
         r, _ = regexp.Compile("(([0-9]?[-])?[0-9]+(개|봉|입|과))")
 
@@ -148,7 +150,7 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
             Category: item,
             Date:     currentDate,
             Name:     name[i],
-            Price:    price[i],
+            Price:    strings.Replace(price[i], ",", "", -1),
             SiteName: parts[1],
             Weight:   weight,
             Cnt:      cnt,
