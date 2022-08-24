@@ -1,0 +1,15 @@
+[Unit]
+Description=Curly Engine
+ConditionPathExists=/etc/init.d/curly.engine
+After=rc-local.service
+ 
+[Service]
+Type=forking
+User=root
+ExecStart=/etc/init.d/curly.engine start
+WorkingDirectory=/home/ubuntu/curlyEngine
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

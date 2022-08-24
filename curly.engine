@@ -1,0 +1,147 @@
+#!/bin/bash
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+BASEDIR=/home/ubuntu/curlyEngine
+NAME=curlyEngine
+DAEMON=${BASEDIR}/${NAME}
+PIDFILE=/var/run/curly-engine.pid
+CONFIGFILE=${BASEDIR}/curlyEngine.ini
+LOGDIR=/${BASEDIR}/dist/log
+LOGFILE=/dev/null
+USER=root
+
+# exit script if not running as root
+if [ $(id -u) -ne 0 ]; then
+    echo "Error: script has to be run as root"
+    exit 1
+fi
+
+start_daemon () {
+	#exit script if package is not installed
+	[ -x "$DAEMON" ] || exit
+
+	$DAEMON -ini $CONFIGFILE > $LOGFILE 2>&1 & echo $! > $PIDFILE
+	sleep 1
+
+	do_status
+	if [ $? -eq 0 ]; then
+		rm $PIDFILE
+		echo "Error: Failed to start $NAME"
+		exit 1
+	else
+		echo "$NAME started"
+	fi
+}
+
+kill_daemon () {
+	kill -$1 $2 2>/dev/null
+
+    local TIMEOUT=$3
+    while [ -d /proc/$2 ]; do
+        TIMEOUT=$(expr $TIMEOUT - 1)
+        if [ "$TIMEOUT" = "0" ]; then
+            return 1
+        fi
+        sleep 1
+    done
+
+    return 0
+}
+
+stop_daemon () {
+	local PID=$(cat $PIDFILE)
+
+    kill_daemon TERM $PID 15
+    if [ $? -eq 1 ]; then
+        echo "Warning: stop action timed out"
+        kill_daemon KILL $PID 10
+    fi
+    rm -f $PIDFILE
+
+    do_status
+    if [ ! $? -eq 0 ]; then
+        echo "Error: failed to stop $NAME"
+        exit 1
+    else
+        echo "$NAME stopped"
+    fi
+}
+
+do_status () {
+	if [ -f $PIDFILE ]; then
+		local PID=$(cat $PIDFILE)
+		if [ -d /proc/$PID ] && [ ! -z $PID ]; then
+			return 1
+		fi
+	fi
+
+	return 0;
+}
+
+do_start () {
+    do_status
+    if [ $? -eq 1 ]; then
+        echo "$NAME already running"
+        return 0
+    fi
+
+    start_daemon
+}
+
+do_stop () {
+    do_status
+    if [ $? -eq 0 ]; then
+        echo "$NAME not running"
+        return 0
+    fi
+
+    stop_daemon
+}
+
+# exit codes
+# 0 OK
+# 1 generic error (see message)
+# 2 invalid arguments
+# 3 unimplemented feature
+# 5 progam not installed (correctly)
+case "$1" in
+	start|"")
+		do_start
+		;;
+	stop)
+		do_stop
+		;;
+	restart)
+		do_stop
+		do_start
+		;;
+	try-restart)
+		do_status
+		if [ $? -eq 1 ]; then
+			do_stop
+			do_start
+		fi
+		;;
+	reload)
+		echo "Error: argument '$1' is not supported"
+		exit 3
+		;;
+	force-reload)
+		echo "Warning: '$1' is not supported - performing restart instead"
+		do_stop
+		do_start
+		;;
+	status)
+		do_status
+		if [ $? -eq 1 ]; then
+			echo "$NAME running"
+		else
+			echo "$NAME not running"
+		fi
+		;;
+	*)
+		echo "Error: use {start|stop|restart|try-restart|force-reload|status}"
+		exit 2
+		;;
+esac
