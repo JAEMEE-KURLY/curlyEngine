@@ -129,11 +129,11 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
 
     for i := 0; i < len(name); i++ {
         tempPrice, _ := strconv.Atoi(strings.Replace(price[i], ",", "", -1))
-        r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg))")
+        r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg|G|Kg|kG|KG))")
 
         weight := r.FindString(name[i])
-        weight = strings.Replace(weight, "g", "", -1)
         weight = strings.Replace(weight, "kg", "", -1)
+        weight = strings.Replace(weight, "g", "", -1)
         tempWeight, _ := strconv.ParseFloat(weight, 32)
 
         r, _ = regexp.Compile("(([0-9]?[-])?[0-9]+(개|봉|입|과))")
