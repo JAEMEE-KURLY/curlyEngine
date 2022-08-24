@@ -132,7 +132,11 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
         r, _ := regexp.Compile("(([0-9]*[.])?[0-9]+(g|kg|G|Kg|kG|KG))")
 
         weight := r.FindString(name[i])
+        weight = strings.Replace(weight, "KG", "", -1)
+        weight = strings.Replace(weight, "kG", "", -1)
+        weight = strings.Replace(weight, "Kg", "", -1)
         weight = strings.Replace(weight, "kg", "", -1)
+        weight = strings.Replace(weight, "G", "", -1)
         weight = strings.Replace(weight, "g", "", -1)
         tempWeight, _ := strconv.ParseFloat(weight, 64)
 
@@ -140,7 +144,7 @@ func GetScrawlingInfo(buttonElem string, buttonClass string, divContainerClass s
 
         cnt := r.FindString(name[i])
 
-        r, _ = regexp.Compile("(g|kg)")
+        r, _ = regexp.Compile("(g|kg|G|Kg|kG|KG)")
 
         unit := r.FindString(name[i])
 
